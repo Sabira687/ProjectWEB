@@ -3,35 +3,64 @@ const User = require('../models/User');
 
 exports.getAllPosts = async (req, res) => {
     try {
-        const {search, tag} = req.query;
+        const { search, tag } = req.query;
         let query = {};
-        if (search) query.title = {$regex: search, $options: 'i'};
-        if (tag) query.tags = {$in: [tag]};
+        if (search && search !== 'undefined' && search !== '') {
+            query.title = { $regex: search, $options: 'i' };
+        }
+        if (tag && tag !== 'undefined' && tag !== '') {
+            query.tags = { $in: [tag] };
+        }
 
-        const posts = await Post.find(query).populate('author', 'profile.name').sort({createdAt: -1});
+        const posts = await Post.find(query)
+            .populate('author', 'email')
+            .sort({ createdAt: -1 });
+
         res.json(posts);
     } catch (err) {
-        res.status(500).json({error: err.message});
+        res.status(500).json({ error: err.message });
     }
 };
 
 exports.getPostById = async (req, res) => {
     try {
-        const post = await Post.findById(req.params.id).populate('author', 'profile.name profile.avatar');
+        const post = await Post.findById(req.params.id)
+            .populate('author', 'email')
+            .populate({
+                path: 'comments',
+                populate: {
+                    path: 'author',
+                    select: 'email'
+                }
+            });
+
         if (!post) return res.status(404).json({message: 'Post not found'});
         res.json(post);
     } catch (err) {
+        console.error("Error in getPostById:", err.message);
         res.status(500).json({error: err.message});
     }
 };
 
 exports.createPost = async (req, res) => {
     try {
-        const post = new Post({...req.body, author: req.userId});
-        await post.save();
-        res.status(201).json(post);
+        const { title, content, tags } = req.body;
+
+        if (!title || !content) {
+            return res.status(400).json({ error: "Title and content are required" });
+        }
+
+        const post = new Post({
+            title,
+            content,
+            tags,
+            author: req.userId
+        });
+
+        const savedPost = await post.save();
+        res.status(201).json(savedPost);
     } catch (err) {
-        res.status(500).json({error: err.message});
+        res.status(500).json({ error: err.message });
     }
 };
 

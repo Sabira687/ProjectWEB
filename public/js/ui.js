@@ -6,7 +6,7 @@ export function renderHeader() {
     header.innerHTML = `
         <div class="container">
             <nav>
-                <a href="index.html" class="logo">EcoBlog</a>
+                <a href="index.html" class="logo">Blog</a>
                 <input type="text" id="searchInput" placeholder="Search posts..." class="search-input">
                 <div class="nav-links">
                     ${token ? `

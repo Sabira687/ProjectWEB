@@ -1,4 +1,4 @@
-import { request } from './api.js';
+import {request} from './api.js';
 
 const authForm = document.getElementById('authForm');
 const authTitle = document.getElementById('authTitle');
@@ -29,7 +29,7 @@ authForm.addEventListener('submit', async (e) => {
     const role = document.getElementById('role').value;
 
     const endpoint = isLogin ? '/auth/login' : '/auth/register';
-    const payload = isLogin ? { email, password } : { email, password, role };
+    const payload = isLogin ? {email, password} : {email, password, role};
 
     try {
         const data = await request(endpoint, {

@@ -1,88 +1,80 @@
-import { request } from './api.js';
-import { renderHeader } from './ui.js';
-
-const createPostForm = document.getElementById('createPostForm');
-const myPostsList = document.getElementById('myPostsList');
+import {request} from './api.js';
+import {renderHeader} from './ui.js';
 
 async function init() {
-    const role = localStorage.getItem('role');
-
-    if (role !== 'Creator') {
-        alert('Access denied. Creators only.');
-        window.location.href = 'index.html';
-        return;
-    }
-
     renderHeader();
-    await loadMyPosts();
-}
-
-async function loadMyPosts() {
-    try {
-        const userId = localStorage.getItem('userId');
-        const posts = await request(`/posts/author/${userId}`);
-        renderMyPosts(posts);
-    } catch (err) {
-        console.error('Error loading posts:', err);
-    }
-}
-
-function renderMyPosts(posts) {
-    if (posts.length === 0) {
-        myPostsList.innerHTML = '<p>You haven\'t published anything yet.</p>';
-        return;
-    }
-
-    myPostsList.innerHTML = posts.map(post => `
-        <div class="manage-item">
-            <div>
-                <strong>${post.title}</strong>
-                <span style="color: #888; font-size: 0.8rem; margin-left: 10px;">${new Date(post.createdAt).toLocaleDateString()}</span>
-            </div>
-            <div class="manage-actions">
-                <button class="btn btn-edit" onclick="editPost('${post._id}')">Edit</button>
-                <button class="btn btn-delete" onclick="deletePost('${post._id}')">Delete</button>
-            </div>
-        </div>
-    `).join('');
-}
-
-createPostForm.addEventListener('submit', async (e) => {
-    e.preventDefault();
-
-    const payload = {
-        title: document.getElementById('postTitle').value,
-        content: document.getElementById('postContent').value,
-        tags: document.getElementById('postTags').value.split(',').map(t => t.trim()).filter(t => t !== '')
-    };
+    const currentUserId = localStorage.getItem('userId');
+    const container = document.getElementById('myPostsList');
 
     try {
-        await request('/posts', {
-            method: 'POST',
-            body: JSON.stringify(payload)
+        const allPosts = await request('/posts');
+        const myPosts = allPosts.filter(p => {
+            const authorId = String(p.author?._id || p.author);
+            const myId = String(currentUserId);
+            return authorId === myId;
         });
 
-        alert('Post published successfully!');
-        createPostForm.reset();
-        await loadMyPosts();
+        if (myPosts.length === 0) {
+            container.innerHTML = '<p>You haven\'t created any posts yet.</p>';
+            return;
+        }
+
+        container.innerHTML = myPosts.map(post => `
+            <div class="manage-item" style="display:flex; justify-content:space-between; padding:10px; border-bottom:1px solid #eee;">
+                <span><strong>${post.title}</strong></span>
+                <div>
+                    <button onclick="window.location.href='post.html?id=${post._id}'" class="btn-sm">View</button>
+                    <button onclick="window.deletePost('${post._id}')" style="color:red; margin-left:10px; cursor:pointer;">Delete</button>
+                </div>
+            </div>
+        `).join('');
+
     } catch (err) {
-        alert('Error: ' + err.message);
+        console.error("Studio error:", err);
     }
-});
+    setupCreateForm();
+}
+function setupCreateForm() {
+    const form = document.getElementById('createPostForm');
+    if (!form) return;
+
+    form.onsubmit = async (e) => {
+        e.preventDefault();
+
+        const title = document.getElementById('postTitle').value;
+        const content = document.getElementById('postContent').value;
+        const tags = document.getElementById('postTags').value
+            .split(',')
+            .map(t => t.trim())
+            .filter(t => t !== "");
+
+        const postData = { title, content, tags };
+
+        try {
+            const result = await request('/posts', {
+                method: 'POST',
+                body: JSON.stringify(postData)
+            });
+
+            console.log("Post created:", result);
+            alert("Post published successfully!");
+            form.reset();
+            init();
+        } catch (err) {
+            console.error("Creation error:", err);
+            alert("Failed to create post: " + err.message);
+        }
+    };
+}
 
 window.deletePost = async (id) => {
-    if (!confirm('Are you sure you want to delete this post?')) return;
-
+    if (!confirm("Delete this post?")) return;
     try {
-        await request(`/posts/${id}`, { method: 'DELETE' });
-        await loadMyPosts();
+        await request(`/posts/${id}`, {method: 'DELETE'});
+        init();
     } catch (err) {
         alert(err.message);
     }
-};
-
-window.editPost = (id) => {
-    console.log('Edit post:', id);
 };
 
 init();

@@ -4,27 +4,27 @@ exports.getProfile = async (req, res) => {
     try {
         const user = await User.findById(req.userId)
             .select('-password')
-            .populate('likedPosts')
-            .populate('following', 'profile.name profile.avatar');
+            .populate('likedPosts', 'title')
+            .populate('following', 'email');
 
-        if (!user) return res.status(404).json({ message: "User not found" });
         res.json(user);
-    } catch (error) {
-        res.status(500).json({ error: error.message });
+    } catch (err) {
+        res.status(500).json({error: err.message});
     }
 };
 
 exports.updateProfile = async (req, res) => {
     try {
-        const { name, bio, avatar } = req.body;
+        const {bio} = req.body;
         const user = await User.findByIdAndUpdate(
             req.userId,
-            { $set: { "profile.name": name, "profile.bio": bio, "profile.avatar": avatar } },
-            { new: true }
-        ).select('-password');
+            {bio},
+            {new: true}
+        ).select('bio email');
+
         res.json(user);
-    } catch (error) {
-        res.status(500).json({ error: error.message });
+    } catch (err) {
+        res.status(500).json({error: err.message});
     }
 };
 
@@ -34,7 +34,7 @@ exports.followCreator = async (req, res) => {
         const userId = req.userId;
 
         if (creatorId === userId) {
-            return res.status(400).json({ message: "You cannot follow yourself" });
+            return res.status(400).json({message: "You cannot follow yourself"});
         }
 
         const user = await User.findById(userId);
@@ -52,30 +52,30 @@ exports.followCreator = async (req, res) => {
             followingCount: user.following.length
         });
     } catch (error) {
-        res.status(500).json({ error: error.message });
+        res.status(500).json({error: error.message});
     }
 };
 
 exports.getFollowers = async (req, res) => {
     try {
-        const followers = await User.find({ following: req.userId }, 'profile.name email profile.avatar');
+        const followers = await User.find({following: req.userId}, 'profile.name email profile.avatar');
         res.json(followers);
     } catch (error) {
-        res.status(500).json({ error: error.message });
+        res.status(500).json({error: error.message});
     }
 };
 
 exports.removeFollower = async (req, res) => {
     try {
-        const { followerId } = req.params;
+        const {followerId} = req.params;
         const creatorId = req.userId;
 
         await User.findByIdAndUpdate(followerId, {
-            $pull: { following: creatorId }
+            $pull: {following: creatorId}
         });
 
-        res.json({ message: "Follower removed from your list" });
+        res.json({message: "Follower removed from your list"});
     } catch (error) {
-        res.status(500).json({ error: error.message });
+        res.status(500).json({error: error.message});
     }
 };

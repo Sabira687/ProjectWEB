@@ -1,5 +1,5 @@
-import { request } from './api.js';
-import { renderHeader } from './ui.js';
+import {request} from './api.js';
+import {renderHeader} from './ui.js';
 
 let allPosts = [];
 
@@ -14,11 +14,22 @@ async function init() {
 
 async function fetchPosts() {
     try {
-        allPosts = await request('/posts');
-        renderPosts(allPosts);
-        renderTags(allPosts);
+        const posts = await request('/posts');
+        console.log("Response from server:", posts);
+
+        if (!Array.isArray(posts)) {
+            console.error("не массив!");
+            return;
+        }
+
+        if (posts.length === 0) {
+            document.getElementById('postsContainer').innerHTML = "<p>No posts found in database.</p>";
+            return;
+        }
+
+        renderPosts(posts);
     } catch (err) {
-        console.error('Failed to load posts', err);
+        console.error("Fetch failed:", err);
     }
 }
 
@@ -32,7 +43,7 @@ function renderPosts(posts) {
                 <div>
                     ${post.tags.map(tag => `<span class="tag">#${tag}</span>`).join('')}
                 </div>
-                <span>By ${post.author?.name || 'Unknown'}</span>
+                <span>By <strong>${post.author && post.author.email ? post.author.email : 'Unknown'}</strong></span>
             </div>
             <button class="btn" onclick="window.location.href='post.html?id=${post._id}'" style="margin-top: 15px;">
                 Read More
