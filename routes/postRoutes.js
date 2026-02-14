@@ -5,7 +5,6 @@ const { verifyToken, isCreator } = require('../middleware/authMiddleware');
 
 router.get('/', postController.getAllPosts);
 router.get('/:id', postController.getPostById);
-
 router.post('/:id/like', verifyToken, postController.toggleLike);
 
 router.post('/', verifyToken, isCreator, postController.createPost);

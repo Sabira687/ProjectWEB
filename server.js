@@ -1,25 +1,20 @@
+require('dotenv').config();
 const express = require('express');
-const mongoose = require('mongoose');
-const dotenv = require('dotenv');
-const path = require('path');
+const connectDB = require('./config/db');
+const cors = require('cors');
 
-dotenv.config();
 const app = express();
 
+connectDB();
+
+app.use(cors());
 app.use(express.json());
 app.use(express.static('public'));
 
-mongoose.connect(process.env.MONGO_URI)
-    .then(() => console.log('MongoDB Connected'))
-    .catch(err => console.log('DB Error:', err));
+app.use('/api/auth', require('./routes/authRoutes'));
+app.use('/api/posts', require('./routes/postRoutes'));
+app.use('/api/users', require('./routes/userRoutes'));
+app.use('/api/comments', require('./routes/commentRoutes'));
 
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
-
-const authRoutes = require('./routes/authRoutes');
-app.use('/api/auth', authRoutes);
-
-const postRoutes = require('./routes/postRoutes');
-const userRoutes = require('./routes/userRoutes'); // Создадим позже
-
-app.use('/api/posts', postRoutes);
+app.listen(PORT, () => console.log(`🚀 Server running on http://localhost:${PORT}`));
