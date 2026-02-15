@@ -48,7 +48,7 @@ PORT=3000
 
 4. Start the server
 ```bash
-npm start
+node server.js
 ```
 
 5. Access the application
