@@ -5,7 +5,7 @@ async function init() {
     renderHeader();
     const currentUserId = localStorage.getItem('userId');
     const container = document.getElementById('myPostsList');
-
+    setupCreateForm();
     try {
         const allPosts = await request('/posts');
         const myPosts = allPosts.filter(p => {
@@ -32,7 +32,6 @@ async function init() {
     } catch (err) {
         console.error("Studio error:", err);
     }
-    setupCreateForm();
 }
 function setupCreateForm() {
     const form = document.getElementById('createPostForm');

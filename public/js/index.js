@@ -18,16 +18,21 @@ async function fetchPosts() {
         console.log("Response from server:", posts);
 
         if (!Array.isArray(posts)) {
-            console.error("не массив!");
+            console.error("Not array!");
             return;
         }
+        allPosts = posts;
 
-        if (posts.length === 0) {
+        if (allPosts.length === 0) {
             document.getElementById('postsContainer').innerHTML = "<p>No posts found in database.</p>";
             return;
         }
 
-        renderPosts(posts);
+        renderPosts(allPosts);
+        if (document.getElementById('tagList')) {
+            renderTags(allPosts);
+        }
+
     } catch (err) {
         console.error("Fetch failed:", err);
     }

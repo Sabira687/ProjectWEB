@@ -30,7 +30,7 @@ A production-ready Full-Stack Blogging application that features secure authenti
 
 1. Clone the repository
 ```bash
-git clone [https://github.com/your-username/project.git](https://github.com/your-username/project.git)
+git clone
 ```
 
 2. Install dependencies
@@ -41,8 +41,8 @@ npm install
 3. Configure Environment Variables
    Create a `.env` file in the root directory and add:
 ```bash
-MONGODB_URI="your_mongodb_connection_string"
-JWT_SECRET="your_secure_secret_key"
+MONGODB_URI="mongodb_connection"
+JWT_SECRET="secret_key"
 PORT=3000
 ```
 
@@ -62,15 +62,20 @@ Open your browser and navigate to http://localhost:3000
 
 ### 1. Home Page
 The main landing page displaying a feed of all published articles with search and tag filtering capabilities.
+![home](img/home.png)
 
 ### 2. Authentication Page
 Secure forms for user registration and login used to manage user sessions.
+![reg](img/reg.png)
 
 ### 3. Single Post View
 Detailed view of an article, including the full text, like count, and an interactive comment section.
+![post](img/post.png)
 
 ### 4. Studio Dashboard
 A dedicated management area for creators to view their own posts and perform administrative tasks like deletion.
+![studio](img/studio.png)
 
 ### 5. Profile Page
 User profile section where users can view their liked posts and update their personal bio via a modal window.
+![profile](img/profile.png)
